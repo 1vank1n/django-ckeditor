@@ -106,18 +106,27 @@ class ImageUploadView(generic.View):
 
         img_name, img_format = os.path.splitext(filename)
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
+        IMAGE_UPLOAD_RESIZE = getattr(settings, "CKEDITOR_IMAGE_UPLOAD_RESIZE", False)
+        IMAGE_RESIZE_WIDTH = getattr(settings, "CKEDITOR_IMAGE_RESIZE_WIDTH", 1500)
+        IMAGE_RESIZE_HEIGHT = getattr(settings, "CKEDITOR_IMAGE_RESIZE_HEIGHT", 1500)
+        max_size = (IMAGE_RESIZE_WIDTH, IMAGE_RESIZE_HEIGHT)
 
         if(str(img_format).lower() == "png"):
-
             img = Image.open(uploaded_file)
-            img = img.resize(img.size, Image.ANTIALIAS)
+            if IMAGE_UPLOAD_RESIZE:
+                img = img.thumbnail(max_size, Image.ANTIALIAS)
+            else:
+                img = img.resize(img.size, Image.ANTIALIAS)
             saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
 
         elif(str(img_format).lower() == "jpg" or str(img_format).lower() == "jpeg"):
 
             img = Image.open(uploaded_file)
-            img = img.resize(img.size, Image.ANTIALIAS)
+            if IMAGE_UPLOAD_RESIZE:
+                img = img.thumbnail(max_size, Image.ANTIALIAS)
+            else:
+                img = img.resize(img.size, Image.ANTIALIAS)
             saved_path = default_storage.save(filename, uploaded_file)
             img.save(saved_path, quality=IMAGE_QUALITY, optimize=True)
 
