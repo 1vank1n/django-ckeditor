@@ -111,24 +111,26 @@ class ImageUploadView(generic.View):
         IMAGE_RESIZE_HEIGHT = getattr(settings, "CKEDITOR_IMAGE_RESIZE_HEIGHT", 1500)
         max_size = (IMAGE_RESIZE_WIDTH, IMAGE_RESIZE_HEIGHT)
 
-        if(str(img_format).lower() == "png"):
+        if(str(img_format).lower() == ".png"):
             img = Image.open(uploaded_file)
-            if IMAGE_UPLOAD_RESIZE:
-                img = img.thumbnail(max_size, Image.ANTIALIAS)
-            else:
-                img = img.resize(img.size, Image.ANTIALIAS)
+            img = img.resize(img.size, Image.ANTIALIAS)
             saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
-            img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
-
-        elif(str(img_format).lower() == "jpg" or str(img_format).lower() == "jpeg"):
-
-            img = Image.open(uploaded_file)
             if IMAGE_UPLOAD_RESIZE:
-                img = img.thumbnail(max_size, Image.ANTIALIAS)
-            else:
-                img = img.resize(img.size, Image.ANTIALIAS)
+                path = 'media/' + saved_path
+                img = Image.open(path)
+                img = img.convert('RGB')
+                img.thumbnail(max_size, Image.ANTIALIAS)
+                img.save(path)
+
+        elif(str(img_format).lower() == ".jpg" or str(img_format).lower() == ".jpeg"):
+            img = Image.open(uploaded_file)
+            img = img.resize(img.size, Image.ANTIALIAS)
             saved_path = default_storage.save(filename, uploaded_file)
-            img.save(saved_path, quality=IMAGE_QUALITY, optimize=True)
+            if IMAGE_UPLOAD_RESIZE:
+                path = 'media/' + saved_path
+                img = Image.open(path)
+                img.thumbnail(max_size, Image.ANTIALIAS)
+                img.save(path, quality=IMAGE_QUALITY, optimize=True)
 
         else:
             saved_path = default_storage.save(filename, uploaded_file)
